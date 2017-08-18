@@ -1,2 +1,2 @@
 # lai_style
-骚猪
+what a wonderful world!
