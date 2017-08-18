@@ -1,2 +1,2 @@
-# lai_tyle
+# lai_style
 骚猪
