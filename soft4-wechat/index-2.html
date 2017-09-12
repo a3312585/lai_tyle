@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+
+		<title>微信的前备知识-canvas</title>
+	</head>
+	<style>
+		#oc{background: #eee;}
+		
+	</style>
+	<body>
+		<!--canvas 我们需要在html中进行设置-->
+		<canvas id="oc" width="500" height="500">
+			浏览器不支持该标记
+		</canvas>
+		<script>
+			var  oC = document.getElementById('oc');
+			var oGC = oC.getContext('2d');//设置2d画板
+			
+			//画矩形
+			oGC.fillRect(50,50,500,500);
+			oGC.fillStyle = 'blue';
+			oGC.globalCompositeOperation = 'destination-out';//设置两个以上的图像的层叠关系   ，抠像的效果--适用于刮刮卡的刮的效果，
+			oGC.fillRect(100,100,100,100);
+			
+			//画圆
+			oGC.beginPath();
+			oGC.arc(200,200,50,0,360*Math.PI/180,true);
+			oGC.closePath();
+			oGC.fill();
+			
+			//画线
+			oGC.lineWidth = 30;
+			oGC.lineCap = 'round';
+			oGC.moveTo(270,270);
+			oGC.lineTo(500,500);
+			oGC.stroke();
+		
+			
+		</script>
+	</body>
+</html>

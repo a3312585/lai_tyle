@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=640, user-scalable=no" />
+		<title>微信场景-场景动画</title>
+	</head>
+	<style>
+		/*横向适配使用的viewport   ，纵向适配使用的js效果*/
+		*{padding: 0;margin: 0;}
+		li{list-style: none;}
+		#main{ height:960px; width: 640px; position: relative; overflow: hidden;}
+		#oc{width: 100%; height: 100%; position: absolute; top:0;left:0;z-index: 10;}
+		#list > li{width: 100%; height: 100%; position: absolute; top:0;left:0; background-size: cover;/*将图片等比放大或缩小，布满整个屏幕*/
+		background-repeat: no-repeat; display: none;z-index: 5; }
+		#list > li:nth-of-type(1){background-image:url(img/b.png); display: block;}
+		#list > li:nth-of-type(2){background-image:url(img/c.png);}
+		#list > li:nth-of-type(3){background-image:url(img/d.png);}
+		#list > li:nth-of-type(4){background-image:url(img/e.png);}
+		#list > li:nth-of-type(5){background-image:url(img/ad1.png);}
+		#list > li:nth-of-type(6){background-image:url(img/ad2.png);}
+		#list > li.zIndex{z-index: 6;}
+		
+		/*第一屏的样式*/
+		#list > li .li1Child {color: #fff; font-size:30px;position: absolute;top:60%;left:20%;}
+		
+		
+		
+	</style>
+	<body>
+		<!--<div style="width:640px;height:320px; background: blue;">sdfasf</div>-->
+		<div id="main">
+			<canvas id="oc" width="640" height="960">浏览器不支持该标签</canvas>
+			<ul id="list">
+				<li >
+					<ul class="li1Child">
+						<li>
+							<p>曾经做为前端开发的你</p>
+							<p>解决PC兼容性而焦头烂额</p>
+						</li>
+						<li>
+							<p>而今</p>
+							<p>移动端H5应用疯狂来袭</p>
+						</li>
+						<li>
+							<p>你是否已准备充分</p>
+							<p>学习新技能</p>
+						</li>
+						<li>
+							<p>曾破茧成蝶、重获新生？</p>
+						</li>
+					</ul>	
+
+				</li>
+				<li>
+					
+				</li>
+				<li></li>
+				<li></li><li></li><li></li>
+			</ul>
+		</div>
+		<script type="text/javascript" src="js/jquery-2.1.3.min.js" ></script>
+		<script>
+			//window.onload  窗口  ，等窗口的内容都加载完，再执行里面的js，加载内容比 $(function(){}) 多，加载时间比$(function(){})长
+			//$(document).ready(function(){})  等文档加载完，执行里面的js
+			
+			$(function(){
+				//定义变量
+				//js,jq对于节点，使用一次以上的节点，我们需要进行变量的保存，提高性能
+				var $main = $('#main');
+				var $list = $('#list');
+				var $li = $list.find('>li');
+				
+				//默认尺寸
+				var desW = 640;
+				var desH = 960;
+				
+				//获取屏幕高度
+				var viewH = $(window).height();
+				//alert(viewH);
+				//将高度赋值给#main
+				$main.css('height',viewH);
+				
+				//计算图片放大后的宽度
+				var nowW = desW/desH * viewH;
+				
+				//偏移
+				$li.css('backgroundPosition',-(nowW - desW )/2+'px 0px');
+				
+				//实现刮刮卡的效果
+				slideCanvas();
+				
+				//滑屏效果
+				slideList();
+				
+				//刮刮卡效果函数
+				/*
+				 *1.注意：刮刮卡的像素级操作，需要在服务器环境下运行
+				 * 2.获取画板，给了画板高度
+				 * 3.给画板填底图 ，加载后画到画板上
+				 * 4.初始化画笔
+				 * 5.开始触摸 （获取x,y轴坐标，开始划线）
+				 * 6.触摸中 （继续划线）
+				 * 7.触摸结束时，获取底图面积，计算刮开面积，比较大小，如果到了1/3 ,将canvas层删除掉
+				 * 8.解除绑定
+				 * */
+				
+				function slideCanvas(){
+					//获取画板
+					var oC = $('#oc').get(0);//转成js的原生对象
+					console.log(oC);
+					var oGC = oC.getContext('2d');
+					oC.height = viewH;//给画板一个正确的高度
+					//给画板填底图
+					var imgObj = new Image();//创建一个图片对象
+					imgObj.src = 'img/a.png';
+					//当图片加载成功后执行js
+					imgObj.onload = function(){
+						//将图片画到画布上
+						//oGC.drawImage(imgObj,0,0,640,viewH);
+						//画一个即不变形，又在中间显示的底图
+						oGC.drawImage(imgObj,(desW - nowW )/2,0,nowW,viewH);
+						
+						//初始化画笔
+						oGC.lineWidth = 80;
+						oGC.lineCap = 'round';
+						oGC.globalCompositeOperation = 'destination-out';
+						var bBtn = true; //第一次触发touchstart 事件
+						//开始触摸事件
+						$(oC).on('touchstart',function(ev){
+							//获取手指列表
+							var touch = ev.originalEvent.changedTouches[0];
+							//console.log(touch);
+							//获取x,y轴坐标
+							var x = touch.pageX;
+							var y = touch.pageY;
+							
+							//画线
+							if(bBtn){//第一点
+								oGC.moveTo(x,y);
+								oGC.lineTo(x+1,y+1);
+								bBtn = false;
+							}else{//其余点
+								oGC.lineTo(x,y);
+							}
+							oGC.stroke();
+							
+							
+							//平滑的刮刮卡效果
+							$(oC).on('touchmove.move',function(ev){
+								//获取手指列表
+								var touch = ev.originalEvent.changedTouches[0];
+								//获取x,y轴坐标
+								var x = touch.pageX;
+								var y = touch.pageY;
+								//画线
+								oGC.lineTo(x,y);
+								oGC.stroke();
+							})
+							
+							//当手指抬起时，计算刮开的面积
+							//.move  命名空间
+							$(oC).on('touchend.move',function(ev){
+								//获取底图的面积
+								var imgData = oGC.getImageData(0,0,oC.width,oC.height);
+								
+								var  testData = oGC.getImageData(0,0,10,10);
+								//console.log(testData);
+								// 底图的所有像素点的额个数
+								var allPX = imgData.width * imgData.height;
+								var iNum = 0; //记录刮开的像素个数
+								
+								//刮开的像素点个数
+								for(var i= 0;i<allPX;i++){
+									if(imgData.data[4*i+3]==0){//判断是否 是刮开的像素，如果是0，就是刮开的
+										iNum++;
+									}
+								}
+								//console.log(iNum);
+								//求一下刮开的面积和底图的面积的比值
+								if(iNum >=allPX/5){
+									//动画效果
+									$(this).animate({opacity:0},2000,function(){
+										$(this).remove();//将canvas层删除
+										
+										//调用入场动画
+										cjAnimate[0].inAn();
+									});
+									//将绑定的事件解除绑定
+									$(oC).off('.move');
+								}
+							});	
+						})
+					}
+				}
+			
+				//滑屏效果函数
+				/*
+				 *1.初始化
+				 * 2.开始触摸时，获取第一点的Y轴坐标，当前页下标，隐藏了其他页
+				 * 3.触摸中，获取第二点Y轴坐标，和第一点Y轴坐标比较，看是上滑还是下滑， 获取下一页的下标，给下一页摆位置，设置下一页的显示图层，给本页做动画效果
+				 * 4.触摸结束，动画效果动画时间
+				 * 5.当动画结束时，重置
+				 * */
+				
+				function slideList(){
+					//初始化
+					var downY = 0; //Y轴坐标的默认值
+					var nowIndex = 0;//当前页下标
+					var nextIndex = 0;//下一页的下标
+					var bBtn = true;//滑屏锁  ，true 可以滑屏
+					var step = 1/4; //缩小的比例
+					//开始触摸
+					$li.on('touchstart',function(ev){
+						//滑屏锁的处理
+						if(!bBtn){return ;}bBtn = false;
+						console.log(nextIndex);
+						
+						//获取手指列表
+						var touch = ev.originalEvent.changedTouches[0];
+						//y轴坐标
+						downY = touch.pageY;
+						//获取当前页下标
+						nowIndex = $(this).index();
+						console.log(nowIndex);
+						//其他页要隐藏  siblings() 取兄弟节点
+						$(this).siblings().hide();
+						
+						//触摸中
+						$li.on('touchmove',function(ev){
+							var touch = ev.originalEvent.changedTouches[0];
+							//获取第二点的Y轴坐标,并比较
+							if(touch.pageY < downY ){//上滑屏
+								//获取下一页的下标
+								nextIndex = (nowIndex == $li.length-1)? 0:nowIndex + 1;
+								//给下一页摆个位置
+								$li.eq(nextIndex).css('transform','translate(0,'+(viewH+touch.pageY- downY)+'px)');
+							}else if(touch.pageY > downY ){//下滑屏
+								nextIndex = (nowIndex == 0  )? $li.length-1:nowIndex - 1;
+								$li.eq(nextIndex).css('transform','translate(0,'+(-viewH+touch.pageY- downY)+'px)');
+							}else{//相等时，将滑屏锁打开
+								bBtn = true;
+							}
+							
+							//设置下一页的显示图层
+							$li.eq(nextIndex).addClass('zIndex').show();
+							//设置本页动画
+							//$(this).css('transform','translate(0,'+(touch.pageY-downY)+'px)');
+							$(this).css('transform', 'translate(0, '+(touch.pageY-downY)*step+'px)  scale('+(1-Math.abs(touch.pageY - downY)/viewH*step)+')');
+
+							
+						});
+						
+						//触摸结束时
+						$li.on('touchend',function(){
+							//本页的动画时间
+							$li.eq(nowIndex).css('transition','0.3s');
+							//下一页的动画时间
+							$li.eq(nextIndex).css('transition','0.3s');
+							//下一页的额结束位置
+							$li.eq(nextIndex).css('transform','translate(0,0)');
+							
+						});
+						
+					});
+					
+					//需要动画结束，基础的数据重置
+					$li.on('transitionend webkitTransitionEnd',function(){
+						//动画时间清零
+						$li.css('transition','');
+						//下一页的zIndex移除，其他的页面要隐藏
+						$li.eq(nextIndex).removeClass('zIndex').siblings().hide();
+						//滑屏锁要打开
+						bBtn = true;
+						
+						//调用动画效果
+						if(cjAnimate[nowIndex]){//出场动画
+							cjAnimate[nowIndex].outAn();
+						}
+						if(cjAnimate[nextIndex]){//入场动画
+							cjAnimate[nextIndex].inAn();
+						}
+					})
+					
+				}
+				
+				
+				/*********************场景动画************************/
+				
+				var cjAnimate = [
+					{//第一场
+						inAn:function(){
+							//获取到li
+							var liChild = $li.eq(0).find('li');
+							liChild.css('transform','translate(0,0)');
+							liChild.css('opacity',	1);
+							liChild.css('transition','1s');
+						},
+						outAn:function(){
+							//获取到li
+							var liChild = $li.eq(0).find('li');
+							//li摆位置
+							//liChild.css('transform','translate(200px,0)');
+							liChild.filter(':odd').css('transform','translate(200px,0)');
+							liChild.filter(':even').css('transform','translate(-200px,0)');
+							
+							liChild.css('opacity',0);
+							liChild.css('transition','');
+							
+						}
+					}
+					
+				];
+				
+				//调用出场动画
+				for(var i=0;i<cjAnimate.length;i++){
+					cjAnimate[i].outAn();
+				}
+			});
+			
+		</script>
+	</body>
+</html>

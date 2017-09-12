@@ -1,0 +1,16 @@
+{//第二场
+						inAn:function(){ //入场
+							//获取到li
+							var liChild1 = $li.eq(1).find('li');
+//							liChild1.css('transform','rotateZ(720deg)');
+							liChild1.css('transition','2s');
+							liChild1.removeClass('li1Active');
+						},
+						outAn:function(){ //出场
+							//获取到li
+							var liChild1 = $li.eq(1).find('li');
+							//li摆位置
+							//liChild.css('transform','translate(200px,0)');
+//							liChild1.css('transform','rotateZ(720deg)');
+							liChild1.addClass('li1Active');
+						}
